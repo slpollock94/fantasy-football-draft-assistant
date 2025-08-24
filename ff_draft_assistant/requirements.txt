@@ -2,6 +2,8 @@ pdfplumber
 requests
 openai
 python-dotenv
-"pymongo[srv]"
+pymongo[srv]
 flask
 espn-api
+pytest
+pytest-cov
