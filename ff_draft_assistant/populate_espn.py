@@ -1,11 +1,11 @@
-from espn_api.football import League
-from mongo_utils import insert_players
 import os
 from typing import Dict, Any
+from datetime import datetime
 from dotenv import load_dotenv
+from espn_api.football import League
+from mongo_utils import insert_players
 
 load_dotenv()
-
 
 def populate_from_espn(league_id: str, year: int = 2024, free_agent_limit: int = 50):
     """Populate MongoDB with players from an ESPN league.
@@ -27,7 +27,9 @@ def populate_from_espn(league_id: str, year: int = 2024, free_agent_limit: int =
 
     try:
         if espn_s2 and swid:
-            league = League(league_id=league_id, year=year, espn_s2=espn_s2, swid=swid)
+            league = League(
+                league_id=league_id, year=season, espn_s2=espn_s2, swid=swid
+            )
         else:
             league = League(league_id=league_id, year=year)
 
@@ -63,7 +65,6 @@ def populate_from_espn(league_id: str, year: int = 2024, free_agent_limit: int =
                 )
             else:
                 players[key] = player_data
-
         # Get all teams and their rosters
         for team in league.teams:
             for player in team.roster:
