@@ -1,10 +1,10 @@
 
 import os
 
-from pdf_parser import PDFPlayerSheet
-from openai_parser import parse_table_with_openai
+from .pdf_parser import PDFPlayerSheet
+from .openai_parser import parse_table_with_openai
 import pdfplumber
-from mongo_utils import insert_players, search_players, get_all_players
+from .mongo_utils import insert_players, search_players, get_all_players
 
 def extract_pdf_text(pdf_path):
     text = ""

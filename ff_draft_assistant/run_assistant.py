@@ -1,4 +1,4 @@
-from ff_draft_assistant.draft_assistant import DraftAssistant
+from .draft_assistant import DraftAssistant
 import os
 
 def main():
