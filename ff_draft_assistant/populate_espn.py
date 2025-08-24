@@ -1,20 +1,26 @@
+import os
+from datetime import datetime
+
+from dotenv import load_dotenv
 from espn_api.football import League
 from mongo_utils import insert_players
-import os
-from dotenv import load_dotenv
 
 load_dotenv()
 
-def populate_from_espn(league_id: str, year: int = 2024):
+
+def populate_from_espn(league_id: str, season: int | None = None):
+    season = season or datetime.now().year
     # For private leagues, you may need ESPN cookies
     espn_s2 = os.getenv("ESPN_S2")
     swid = os.getenv("SWID")
-    
+
     try:
         if espn_s2 and swid:
-            league = League(league_id=league_id, year=year, espn_s2=espn_s2, swid=swid)
+            league = League(
+                league_id=league_id, year=season, espn_s2=espn_s2, swid=swid
+            )
         else:
-            league = League(league_id=league_id, year=year)
+            league = League(league_id=league_id, year=season)
         
         players = []
         

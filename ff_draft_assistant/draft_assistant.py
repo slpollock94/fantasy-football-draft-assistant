@@ -24,11 +24,11 @@ class DraftAssistant:
         # ...process ADP...
         return players
 
-    def get_espn_league(self, league_id: str):
-        return ESPNAPI.get_league(league_id)
+    def get_espn_league(self, league_id: str, season: int | None = None):
+        return ESPNAPI.get_league(league_id, season)
 
-    def get_espn_draft(self, league_id: str):
-        return ESPNAPI.get_draft(league_id)
+    def get_espn_draft(self, league_id: str, season: int | None = None):
+        return ESPNAPI.get_draft(league_id, season)
 
 # Example usage:
 # assistant = DraftAssistant('Top_300_Full_PPR.pdf', 'parsed_players.json')
