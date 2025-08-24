@@ -66,7 +66,7 @@ ff_draft_assistant/
 ├── openai_parser.py      # OpenAI-powered table extraction
 ├── mongo_utils.py        # MongoDB operations
 ├── sleeper_api.py        # Sleeper API integration
-├── espn_api.py          # ESPN API integration
+├── espn_http_api.py     # ESPN API integration
 ├── populate_espn.py      # ESPN data population script
 ├── draft_assistant.py    # Core draft logic
 ├── templates/
