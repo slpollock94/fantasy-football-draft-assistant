@@ -4,6 +4,7 @@ from populate_espn import populate_from_espn
 from dotenv import load_dotenv
 import logging
 import os
+from datetime import datetime
 
 app = Flask(__name__)
 load_dotenv()
@@ -37,14 +38,21 @@ def api_players():
 def api_populate_espn():
     data = request.get_json(silent=True) or {}
     league_id = data.get('league_id') or os.getenv('ESPN_LEAGUE_ID')
+    year = data.get('year') or os.getenv('ESPN_YEAR')
 
     if not league_id:
         logger.error('League ID not provided')
         return jsonify({'success': False, 'error': 'league_id is required'}), 400
 
     try:
-        populate_from_espn(league_id)
-        logger.info('Successfully populated data from ESPN league %s', league_id)
+        year = int(year) if year is not None else datetime.now().year
+    except (TypeError, ValueError):
+        logger.warning('Invalid year provided: %s; defaulting to current year', year)
+        year = datetime.now().year
+
+    try:
+        populate_from_espn(league_id, year=year)
+        logger.info('Successfully populated data from ESPN league %s for year %s', league_id, year)
         return jsonify({'success': True})
     except Exception as e:
         logger.exception('Failed to populate ESPN data')
