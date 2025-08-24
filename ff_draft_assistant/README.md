@@ -56,6 +56,14 @@ python app.py
 3. **Access the Web Interface**:
 Open your browser to `http://localhost:4000`
 
+4. **Fetch Sleeper Drafts for a User** (Optional):
+```python
+from ff_draft_assistant.sleeper_api import SleeperAPI
+
+drafts = SleeperAPI.get_drafts_by_user("your_username")  # defaults to current season
+drafts_2023 = SleeperAPI.get_drafts_by_user("your_username", season=2023)
+```
+
 ## Project Structure
 
 ```
