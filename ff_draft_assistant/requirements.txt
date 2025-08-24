@@ -1,0 +1,7 @@
+pdfplumber
+requests
+openai
+python-dotenv
+"pymongo[srv]"
+flask
+espn-api

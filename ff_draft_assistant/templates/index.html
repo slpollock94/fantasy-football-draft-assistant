@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fantasy Football Draft Assistant</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 2em; }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+        th { background: #f4f4f4; }
+        input, select, button { margin: 0.5em 0; padding: 0.3em; }
+        .section { margin: 2em 0; padding: 1em; border: 1px solid #ddd; }
+        .drafted { background-color: #ffcccc; }
+        .available { background-color: #ccffcc; }
+    </style>
+</head>
+<body>
+    <h1>Fantasy Football Draft Assistant</h1>
+    
+    <div class="section">
+        <h2>Populate from ESPN</h2>
+        <input type="text" id="leagueId" placeholder="ESPN League ID" value="1004124703">
+        <input type="number" id="year" placeholder="Year" value="2024">
+        <button onclick="populateFromESPN()">Load ESPN Data</button>
+        <div id="espnStatus"></div>
+    </div>
+
+    <div class="section">
+        <h2>Search Players</h2>
+        <form id="searchForm">
+            <label>Position:
+                <select name="position">
+                    <option value="">All</option>
+                    <option value="RB">RB</option>
+                    <option value="WR">WR</option>
+                    <option value="QB">QB</option>
+                    <option value="TE">TE</option>
+                </select>
+            </label>
+            <label>Team:
+                <input type="text" name="team" placeholder="e.g. SF, KC, DAL">
+            </label>
+            <label>Status:
+                <select name="drafted">
+                    <option value="">All</option>
+                    <option value="true">Drafted</option>
+                    <option value="false">Available</option>
+                </select>
+            </label>
+            <button type="submit">Search</button>
+        </form>
+    </div>
+
+    <table id="playersTable">
+        <thead>
+            <tr>
+                <th>Rank</th>
+                <th>Name</th>
+                <th>Position</th>
+                <th>Team</th>
+                <th>Projected Pts</th>
+                <th>Avg Pts</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+    <script>
+        async function fetchPlayers(params = {}) {
+            const url = new URL('/api/players', window.location.origin);
+            Object.keys(params).forEach(key => {
+                if (params[key]) url.searchParams.append(key, params[key]);
+            });
+            const res = await fetch(url);
+            return res.json();
+        }
+        function renderTable(players) {
+            const tbody = document.querySelector('#playersTable tbody');
+            tbody.innerHTML = '';
+            players.forEach(p => {
+                const status = p.drafted ? 'Drafted' : 'Available';
+                const rowClass = p.drafted ? 'drafted' : 'available';
+                const row = `<tr class="${rowClass}"><td>${p.rank || '-'}</td><td>${p.name}</td><td>${p.position}</td><td>${p.team}</td><td>${p.projected_points || '-'}</td><td>${p.avg_points || '-'}</td><td>${status}</td></tr>`;
+                tbody.insertAdjacentHTML('beforeend', row);
+            });
+        }
+        document.getElementById('searchForm').onsubmit = async function(e) {
+            e.preventDefault();
+            const form = e.target;
+            const params = {
+                position: form.position.value,
+                team: form.team.value.trim(),
+                drafted: form.drafted.value
+            };
+            const players = await fetchPlayers(params);
+            renderTable(players);
+        };
+        async function populateFromESPN() {
+            const leagueId = document.getElementById('leagueId').value;
+            const year = document.getElementById('year').value;
+            const status = document.getElementById('espnStatus');
+            status.textContent = 'Loading...';
+            try {
+                const res = await fetch('/api/populate-espn', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({league_id: leagueId, year: parseInt(year)})
+                });
+                const result = await res.json();
+                if (result.success) {
+                    status.textContent = 'ESPN data loaded successfully!';
+                    fetchPlayers().then(renderTable);
+                } else {
+                    status.textContent = 'Error: ' + result.error;
+                }
+            } catch (e) {
+                status.textContent = 'Error: ' + e.message;
+            }
+        }
+        // Initial load
+        fetchPlayers().then(renderTable);
+    </script>
+</body>
+</html>
