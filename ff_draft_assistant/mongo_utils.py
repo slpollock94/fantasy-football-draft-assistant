@@ -1,6 +1,8 @@
 import os
-from pymongo import MongoClient
+import logging
 from typing import List, Dict
+
+from pymongo import MongoClient
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -16,10 +18,33 @@ client = MongoClient(MONGO_URI)
 db = client[DB_NAME]
 collection = db[COLLECTION_NAME]
 
-def insert_players(players: List[Dict]):
-    if players:
-        collection.delete_many({})  # Clear old data
-        collection.insert_many(players)
+logger = logging.getLogger(__name__)
+
+
+def insert_players(players: List[Dict]) -> None:
+    """Insert or update player documents in MongoDB.
+
+    Parameters
+    ----------
+    players: List[Dict]
+        Player data to upsert into the collection.
+    """
+
+    if not players:
+        logger.info("No players provided for insertion.")
+        return
+
+    inserted = 0
+    updated = 0
+    for player in players:
+        filter_ = {"name": player.get("name"), "position": player.get("position")}
+        result = collection.update_one(filter_, {"$set": player}, upsert=True)
+        if result.matched_count:
+            updated += 1
+        else:
+            inserted += 1
+
+    logger.info("Inserted %d players, updated %d players", inserted, updated)
 
 def search_players(query: Dict) -> List[Dict]:
     return list(collection.find(query, {"_id": 0}))
