@@ -3,7 +3,7 @@ from typing import Dict, Any
 from datetime import datetime
 from dotenv import load_dotenv
 from espn_api.football import League
-from mongo_utils import insert_players
+from .mongo_utils import insert_players
 
 load_dotenv()
 

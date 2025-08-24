@@ -1,6 +1,6 @@
-from ff_draft_assistant.pdf_parser import PDFPlayerSheet
-from ff_draft_assistant.sleeper_api import SleeperAPI
-from ff_draft_assistant.espn_http_api import ESPNAPI
+from .pdf_parser import PDFPlayerSheet
+from .sleeper_api import SleeperAPI
+from .espn_http_api import ESPNAPI
 
 class DraftAssistant:
     def __init__(self, pdf_path: str, json_path: str):

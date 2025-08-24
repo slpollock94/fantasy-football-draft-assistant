@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, jsonify
-from mongo_utils import get_all_players, search_players
-from populate_espn import populate_from_espn
+from .mongo_utils import get_all_players, search_players
+from .populate_espn import populate_from_espn
 from dotenv import load_dotenv
 import logging
 import os
