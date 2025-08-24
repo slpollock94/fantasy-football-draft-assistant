@@ -28,7 +28,7 @@ def populate_from_espn(league_id: str, year: int = 2024, free_agent_limit: int =
     try:
         if espn_s2 and swid:
             league = League(
-                league_id=league_id, year=season, espn_s2=espn_s2, swid=swid
+                league_id=league_id, year=year, espn_s2=espn_s2, swid=swid
             )
         else:
             league = League(league_id=league_id, year=year)
