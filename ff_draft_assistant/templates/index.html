@@ -3,123 +3,774 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fantasy Football Draft Assistant</title>
+    <title>Fantasy Football Draft Assistant Pro</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 2em; }
-        table { border-collapse: collapse; width: 100%; }
-        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-        th { background: #f4f4f4; }
-        input, select, button { margin: 0.5em 0; padding: 0.3em; }
-        .section { margin: 2em 0; padding: 1em; border: 1px solid #ddd; }
-        .drafted { background-color: #ffcccc; }
-        .available { background-color: #ccffcc; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333; 
+            min-height: 100vh;
+        }
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        .header { 
+            background: rgba(255,255,255,0.95); 
+            border-radius: 10px; 
+            padding: 20px; 
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .header h1 { 
+            color: #764ba2; 
+            font-size: 2.5em; 
+            text-align: center; 
+            margin-bottom: 10px;
+        }
+        .header p { 
+            text-align: center; 
+            color: #666; 
+            font-size: 1.1em;
+        }
+        
+        .grid { 
+            display: grid; 
+            grid-template-columns: 350px 1fr; 
+            gap: 20px; 
+            align-items: start;
+        }
+        
+        .sidebar { 
+            background: rgba(255,255,255,0.95); 
+            border-radius: 10px; 
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 20px;
+        }
+        
+        .main-content { 
+            background: rgba(255,255,255,0.95); 
+            border-radius: 10px; 
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .section { 
+            margin-bottom: 25px; 
+            padding: 15px; 
+            border: 1px solid #e0e0e0; 
+            border-radius: 8px;
+            background: #fafafa;
+        }
+        
+        .section h3 { 
+            color: #764ba2; 
+            margin-bottom: 15px; 
+            font-size: 1.3em;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 5px;
+        }
+        
+        .search-box { 
+            width: 100%; 
+            padding: 12px; 
+            border: 2px solid #ddd; 
+            border-radius: 6px; 
+            font-size: 16px;
+            margin-bottom: 15px;
+            transition: border-color 0.3s;
+        }
+        .search-box:focus { 
+            outline: none; 
+            border-color: #667eea; 
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .filter-grid { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 10px; 
+            margin-bottom: 15px;
+        }
+        
+        select, input, button { 
+            padding: 10px; 
+            border: 1px solid #ddd; 
+            border-radius: 6px; 
+            font-size: 14px;
+        }
+        
+        button { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            color: white; 
+            border: none; 
+            cursor: pointer; 
+            font-weight: bold;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        button:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        button:active { 
+            transform: translateY(0);
+        }
+        
+        .btn-secondary { 
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); 
+        }
+        
+        .btn-success { 
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); 
+        }
+        
+        .tab-buttons { 
+            display: flex; 
+            gap: 10px; 
+            margin-bottom: 20px;
+        }
+        .tab-button { 
+            flex: 1; 
+            padding: 12px; 
+            background: #f0f0f0; 
+            border: 1px solid #ddd; 
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .tab-button.active { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            color: white;
+        }
+        
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin-top: 20px;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        th, td { 
+            padding: 12px; 
+            text-align: left; 
+            border-bottom: 1px solid #eee;
+        }
+        th { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            color: white; 
+            font-weight: bold;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        .player-row { transition: background-color 0.2s; }
+        .player-row:hover { background-color: #f5f5f5; }
+        .drafted { background-color: #ffebee; }
+        .available { background-color: #e8f5e8; }
+        .sleeper { background-color: #fff3e0; }
+        .value-pick { background-color: #e3f2fd; }
+        
+        .status-badge { 
+            padding: 4px 8px; 
+            border-radius: 4px; 
+            font-size: 12px; 
+            font-weight: bold;
+        }
+        .status-available { background: #4caf50; color: white; }
+        .status-drafted { background: #f44336; color: white; }
+        
+        .stats { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); 
+            gap: 10px; 
+            margin-bottom: 20px;
+        }
+        .stat-card { 
+            background: white; 
+            padding: 15px; 
+            border-radius: 8px; 
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .stat-number { 
+            font-size: 2em; 
+            font-weight: bold; 
+            color: #764ba2;
+        }
+        .stat-label { 
+            font-size: 0.9em; 
+            color: #666; 
+            margin-top: 5px;
+        }
+        
+        .loading { 
+            text-align: center; 
+            padding: 40px; 
+            color: #666;
+        }
+        
+        .status-message { 
+            padding: 10px; 
+            border-radius: 6px; 
+            margin: 10px 0;
+        }
+        .status-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .status-error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .status-info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        
+        .action-buttons { 
+            display: flex; 
+            gap: 5px; 
+            justify-content: center;
+        }
+        .btn-small { 
+            padding: 4px 8px; 
+            font-size: 12px; 
+            min-width: auto;
+        }
+        
+        @media (max-width: 1024px) {
+            .grid { 
+                grid-template-columns: 1fr; 
+                gap: 20px;
+            }
+            .filter-grid { 
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
-    <h1>Fantasy Football Draft Assistant</h1>
-    
-    <div class="section">
-        <h2>Populate from ESPN</h2>
-        <input type="text" id="leagueId" placeholder="ESPN League ID" value="1004124703">
-        <input type="number" id="year" placeholder="Year" value="2024">
-        <button onclick="populateFromESPN()">Load ESPN Data</button>
-        <div id="espnStatus"></div>
+    <div class="container">
+        <div class="header">
+            <h1>🏈 Fantasy Football Draft Assistant Pro</h1>
+            <p>Advanced player search, analysis, and draft recommendations</p>
+        </div>
+        
+        <div class="grid">
+            <div class="sidebar">
+                <!-- Database Management -->
+                <div class="section">
+                    <h3>📊 Database</h3>
+                    <button onclick="populateNFL()" class="btn-success" style="width: 100%; margin-bottom: 10px;">
+                        Load Full NFL Database
+                    </button>
+                    <button onclick="populateFromESPN()" class="btn-secondary" style="width: 100%; margin-bottom: 10px;">
+                        Load ESPN League Data
+                    </button>
+                    <input type="text" id="leagueId" placeholder="ESPN League ID" value="1004124703" style="width: 100%; margin-bottom: 5px;">
+                    <input type="number" id="year" placeholder="Year" value="2024" style="width: 100%;">
+                    <div id="dbStatus"></div>
+                </div>
+
+                <!-- Search Filters -->
+                <div class="section">
+                    <h3>🔍 Search & Filters</h3>
+                    <input type="text" id="searchQuery" class="search-box" placeholder="Search player names..." onkeyup="debounceSearch()">
+                    
+                    <div class="filter-grid">
+                        <select id="positionFilter" onchange="filterPlayers()">
+                            <option value="">All Positions</option>
+                            <option value="QB">QB</option>
+                            <option value="RB">RB</option>
+                            <option value="WR">WR</option>
+                            <option value="TE">TE</option>
+                            <option value="K">K</option>
+                            <option value="DEF">DEF</option>
+                        </select>
+                        
+                        <select id="teamFilter" onchange="filterPlayers()">
+                            <option value="">All Teams</option>
+                            <option value="SF">SF</option><option value="KC">KC</option><option value="BUF">BUF</option>
+                            <option value="DAL">DAL</option><option value="MIA">MIA</option><option value="PHI">PHI</option>
+                            <option value="LAC">LAC</option><option value="BAL">BAL</option><option value="CIN">CIN</option>
+                            <option value="JAX">JAX</option><option value="MIN">MIN</option><option value="NYJ">NYJ</option>
+                            <option value="LV">LV</option><option value="GB">GB</option><option value="IND">IND</option>
+                            <option value="NO">NO</option><option value="DEN">DEN</option><option value="SEA">SEA</option>
+                            <option value="TEN">TEN</option><option value="CLE">CLE</option><option value="TB">TB</option>
+                            <option value="LAR">LAR</option><option value="ATL">ATL</option><option value="NE">NE</option>
+                            <option value="NYG">NYG</option><option value="CAR">CAR</option><option value="DET">DET</option>
+                            <option value="WAS">WAS</option><option value="PIT">PIT</option><option value="CHI">CHI</option>
+                            <option value="ARI">ARI</option><option value="HOU">HOU</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-grid">
+                        <select id="statusFilter" onchange="filterPlayers()">
+                            <option value="available">Available Only</option>
+                            <option value="all">All Players</option>
+                            <option value="drafted">Drafted Only</option>
+                        </select>
+                        
+                        <select id="sortBy" onchange="filterPlayers()">
+                            <option value="projected_points">Projected Pts</option>
+                            <option value="rank">Rank</option>
+                            <option value="name">Name</option>
+                            <option value="age">Age</option>
+                        </select>
+                    </div>
+                    
+                    <button onclick="clearFilters()" style="width: 100%;">Clear Filters</button>
+                </div>
+                
+                <!-- Quick Actions -->
+                <div class="section">
+                    <h3>⚡ Quick Actions</h3>
+                    <button onclick="showSleepers()" style="width: 100%; margin-bottom: 10px;">
+                        🌟 Show Sleeper Picks
+                    </button>
+                    <button onclick="showValuePicks()" style="width: 100%; margin-bottom: 10px;">
+                        💎 Show Value Picks
+                    </button>
+                    <button onclick="refreshData()" style="width: 100%;">
+                        🔄 Refresh Data
+                    </button>
+                </div>
+                
+                <!-- Database Stats -->
+                <div class="section">
+                    <h3>📈 Database Stats</h3>
+                    <div id="dbStats" class="stats">
+                        <div class="stat-card">
+                            <div class="stat-number" id="totalPlayers">-</div>
+                            <div class="stat-label">Total Players</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="availablePlayers">-</div>
+                            <div class="stat-label">Available</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="draftedPlayers">-</div>
+                            <div class="stat-label">Drafted</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="main-content">
+                <!-- Tab Navigation -->
+                <div class="tab-buttons">
+                    <div class="tab-button active" onclick="showTab('players')">
+                        🏈 Player Database
+                    </div>
+                    <div class="tab-button" onclick="showTab('recommendations')">
+                        🎯 Recommendations
+                    </div>
+                    <div class="tab-button" onclick="showTab('analysis')">
+                        📊 Team Analysis
+                    </div>
+                </div>
+                
+                <!-- Players Tab -->
+                <div id="players-tab" class="tab-content active">
+                    <div id="playersLoading" class="loading" style="display: none;">
+                        Loading players...
+                    </div>
+                    
+                    <div id="playersResultInfo" style="margin-bottom: 15px; font-weight: bold; color: #666;"></div>
+                    
+                    <div style="overflow-x: auto;">
+                        <table id="playersTable">
+                            <thead>
+                                <tr>
+                                    <th>Rank</th>
+                                    <th>Name</th>
+                                    <th>Pos</th>
+                                    <th>Team</th>
+                                    <th>Age</th>
+                                    <th>Proj Pts</th>
+                                    <th>Avg Pts</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Recommendations Tab -->
+                <div id="recommendations-tab" class="tab-content">
+                    <div class="section">
+                        <h3>🌟 Sleeper Picks</h3>
+                        <div id="sleepersTable"></div>
+                    </div>
+                    
+                    <div class="section">
+                        <h3>💎 Value Picks</h3>
+                        <div id="valuePicksTable"></div>
+                    </div>
+                </div>
+                
+                <!-- Analysis Tab -->
+                <div id="analysis-tab" class="tab-content">
+                    <div class="section">
+                        <h3>📊 Team Composition Analysis</h3>
+                        <button onclick="analyzeTeam()" style="margin-bottom: 15px;">
+                            Analyze My Team
+                        </button>
+                        <div id="teamAnalysis"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="section">
-        <h2>Search Players</h2>
-        <form id="searchForm">
-            <label>Position:
-                <select name="position">
-                    <option value="">All</option>
-                    <option value="RB">RB</option>
-                    <option value="WR">WR</option>
-                    <option value="QB">QB</option>
-                    <option value="TE">TE</option>
-                </select>
-            </label>
-            <label>Team:
-                <input type="text" name="team" placeholder="e.g. SF, KC, DAL">
-            </label>
-            <label>Status:
-                <select name="drafted">
-                    <option value="">All</option>
-                    <option value="true">Drafted</option>
-                    <option value="false">Available</option>
-                </select>
-            </label>
-            <button type="submit">Search</button>
-        </form>
-    </div>
-
-    <table id="playersTable">
-        <thead>
-            <tr>
-                <th>Rank</th>
-                <th>Name</th>
-                <th>Position</th>
-                <th>Team</th>
-                <th>Projected Pts</th>
-                <th>Avg Pts</th>
-                <th>Status</th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
     <script>
-        async function fetchPlayers(params = {}) {
-            const url = new URL('/api/players', window.location.origin);
-            Object.keys(params).forEach(key => {
-                if (params[key]) url.searchParams.append(key, params[key]);
-            });
-            const res = await fetch(url);
-            return res.json();
+        let currentPlayers = [];
+        let searchTimeout;
+        
+        // Utility Functions
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            
+            document.getElementById(tabName + '-tab').classList.add('active');
+            event.target.classList.add('active');
         }
-        function renderTable(players) {
+        
+        function debounceSearch() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(filterPlayers, 300);
+        }
+        
+        function showLoading(show = true) {
+            document.getElementById('playersLoading').style.display = show ? 'block' : 'none';
+        }
+        
+        function showStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('dbStatus');
+            statusDiv.innerHTML = `<div class="status-message status-${type}">${message}</div>`;
+            setTimeout(() => statusDiv.innerHTML = '', 5000);
+        }
+        
+        // API Functions
+        async function fetchSearch(params = {}) {
+            const url = new URL('/api/search', window.location.origin);
+            Object.keys(params).forEach(key => {
+                if (params[key] !== '' && params[key] !== null) {
+                    url.searchParams.append(key, params[key]);
+                }
+            });
+            
+            showLoading(true);
+            try {
+                const res = await fetch(url);
+                const data = await res.json();
+                showLoading(false);
+                return data;
+            } catch (e) {
+                showLoading(false);
+                console.error('Search failed:', e);
+                return { players: [], total: 0 };
+            }
+        }
+        
+        async function updateDraftStatus(playerName, drafted) {
+            const endpoint = drafted ? '/api/draft-player' : '/api/undraft-player';
+            try {
+                const res = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ player_name: playerName })
+                });
+                const result = await res.json();
+                
+                if (result.success) {
+                    showStatus(result.message, 'success');
+                    await refreshData();
+                } else {
+                    showStatus('Error: ' + result.error, 'error');
+                }
+            } catch (e) {
+                showStatus('Error: ' + e.message, 'error');
+            }
+        }
+        
+        async function refreshData() {
+            await Promise.all([
+                filterPlayers(),
+                updateStats()
+            ]);
+        }
+        
+        async function updateStats() {
+            try {
+                const res = await fetch('/api/summary');
+                const stats = await res.json();
+                
+                document.getElementById('totalPlayers').textContent = stats.total_players || 0;
+                document.getElementById('availablePlayers').textContent = stats.available_players || 0;
+                document.getElementById('draftedPlayers').textContent = stats.drafted_players || 0;
+            } catch (e) {
+                console.error('Failed to update stats:', e);
+            }
+        }
+        
+        // Search and Filter Functions
+        async function filterPlayers() {
+            const query = document.getElementById('searchQuery').value.trim();
+            const position = document.getElementById('positionFilter').value;
+            const team = document.getElementById('teamFilter').value;
+            const status = document.getElementById('statusFilter').value;
+            const sortBy = document.getElementById('sortBy').value;
+            
+            const params = {
+                q: query,
+                position: position,
+                team: team,
+                available_only: status === 'available',
+                sort_by: sortBy,
+                limit: 100
+            };
+            
+            if (status === 'drafted') {
+                params.available_only = false;
+                // We'll filter drafted players client-side
+            }
+            
+            const data = await fetchSearch(params);
+            let players = data.players || [];
+            
+            if (status === 'drafted') {
+                players = players.filter(p => p.drafted);
+            }
+            
+            currentPlayers = players;
+            renderPlayersTable(players);
+            
+            const resultInfo = `Showing ${players.length} players`;
+            document.getElementById('playersResultInfo').textContent = resultInfo;
+        }
+        
+        function clearFilters() {
+            document.getElementById('searchQuery').value = '';
+            document.getElementById('positionFilter').value = '';
+            document.getElementById('teamFilter').value = '';
+            document.getElementById('statusFilter').value = 'available';
+            document.getElementById('sortBy').value = 'projected_points';
+            filterPlayers();
+        }
+        
+        // Render Functions
+        function renderPlayersTable(players) {
             const tbody = document.querySelector('#playersTable tbody');
             tbody.innerHTML = '';
-            players.forEach(p => {
-                const status = p.drafted ? 'Drafted' : 'Available';
-                const rowClass = p.drafted ? 'drafted' : 'available';
-                const row = `<tr class="${rowClass}"><td>${p.rank || '-'}</td><td>${p.name}</td><td>${p.position}</td><td>${p.team}</td><td>${p.projected_points || '-'}</td><td>${p.avg_points || '-'}</td><td>${status}</td></tr>`;
+            
+            if (players.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; color: #666;">No players found</td></tr>';
+                return;
+            }
+            
+            players.forEach(player => {
+                const status = player.drafted ? 'Drafted' : 'Available';
+                const statusClass = player.drafted ? 'status-drafted' : 'status-available';
+                const rowClass = player.drafted ? 'drafted' : 'available';
+                
+                const draftButton = player.drafted 
+                    ? `<button class="btn-small" onclick="updateDraftStatus('${player.name}', false)">Undraft</button>`
+                    : `<button class="btn-small btn-success" onclick="updateDraftStatus('${player.name}', true)">Draft</button>`;
+                
+                const row = `
+                    <tr class="player-row ${rowClass}">
+                        <td>${player.rank || '-'}</td>
+                        <td><strong>${player.name}</strong></td>
+                        <td><strong>${player.position}</strong></td>
+                        <td>${player.team || '-'}</td>
+                        <td>${player.age || '-'}</td>
+                        <td><strong>${player.projected_points || '-'}</strong></td>
+                        <td>${player.avg_points || '-'}</td>
+                        <td><span class="status-badge ${statusClass}">${status}</span></td>
+                        <td class="action-buttons">${draftButton}</td>
+                    </tr>
+                `;
                 tbody.insertAdjacentHTML('beforeend', row);
             });
         }
-        document.getElementById('searchForm').onsubmit = async function(e) {
-            e.preventDefault();
-            const form = e.target;
-            const params = {
-                position: form.position.value,
-                team: form.team.value.trim(),
-                drafted: form.drafted.value
-            };
-            const players = await fetchPlayers(params);
-            renderTable(players);
-        };
+        
+        // Database Population Functions
+        async function populateNFL() {
+            showStatus('Loading comprehensive NFL database...', 'info');
+            try {
+                const res = await fetch('/api/populate-nfl', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ max_players: 500, use_mock: false })
+                });
+                const result = await res.json();
+                
+                if (result.success) {
+                    showStatus(result.message, 'success');
+                    await refreshData();
+                } else {
+                    showStatus('Error: ' + result.error, 'error');
+                }
+            } catch (e) {
+                showStatus('Error: ' + e.message, 'error');
+            }
+        }
+        
         async function populateFromESPN() {
             const leagueId = document.getElementById('leagueId').value;
             const year = document.getElementById('year').value;
-            const status = document.getElementById('espnStatus');
-            status.textContent = 'Loading...';
+            
+            if (!leagueId) {
+                showStatus('Please enter an ESPN League ID', 'error');
+                return;
+            }
+            
+            showStatus('Loading ESPN league data...', 'info');
             try {
                 const res = await fetch('/api/populate-espn', {
                     method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({league_id: leagueId, year: parseInt(year)})
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ league_id: leagueId, year: parseInt(year) })
                 });
                 const result = await res.json();
+                
                 if (result.success) {
-                    status.textContent = 'ESPN data loaded successfully!';
-                    fetchPlayers().then(renderTable);
+                    showStatus(result.message || 'ESPN data loaded successfully!', 'success');
+                    await refreshData();
                 } else {
-                    status.textContent = 'Error: ' + result.error;
+                    showStatus('Error: ' + result.error, 'error');
                 }
             } catch (e) {
-                status.textContent = 'Error: ' + e.message;
+                showStatus('Error: ' + e.message, 'error');
             }
         }
-        // Initial load
-        fetchPlayers().then(renderTable);
+        
+        // Recommendation Functions
+        async function showSleepers() {
+            try {
+                const res = await fetch('/api/sleepers');
+                const data = await res.json();
+                
+                showTab('recommendations');
+                renderRecommendationTable('sleepersTable', data.sleepers || [], 'Sleeper Score');
+            } catch (e) {
+                showStatus('Error loading sleepers: ' + e.message, 'error');
+            }
+        }
+        
+        async function showValuePicks() {
+            try {
+                const res = await fetch('/api/value-picks');
+                const data = await res.json();
+                
+                showTab('recommendations');
+                renderRecommendationTable('valuePicksTable', data.value_picks || [], 'Value Score');
+            } catch (e) {
+                showStatus('Error loading value picks: ' + e.message, 'error');
+            }
+        }
+        
+        function renderRecommendationTable(tableId, players, scoreLabel) {
+            const container = document.getElementById(tableId);
+            
+            if (players.length === 0) {
+                container.innerHTML = '<p style="color: #666;">No recommendations available</p>';
+                return;
+            }
+            
+            const scoreField = scoreLabel.toLowerCase().replace(' ', '_');
+            
+            const tableHTML = `
+                <div style="overflow-x: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Pos</th>
+                                <th>Team</th>
+                                <th>Proj Pts</th>
+                                <th>${scoreLabel}</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${players.map(player => `
+                                <tr class="player-row">
+                                    <td><strong>${player.name}</strong></td>
+                                    <td><strong>${player.position}</strong></td>
+                                    <td>${player.team || '-'}</td>
+                                    <td><strong>${player.projected_points || '-'}</strong></td>
+                                    <td><strong>${player[scoreField] || '-'}</strong></td>
+                                    <td>
+                                        <button class="btn-small btn-success" onclick="updateDraftStatus('${player.name}', true)">
+                                            Draft
+                                        </button>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            
+            container.innerHTML = tableHTML;
+        }
+        
+        // Team Analysis Functions
+        async function analyzeTeam() {
+            // Get drafted players
+            const draftedPlayers = currentPlayers
+                .filter(p => p.drafted)
+                .map(p => p.name);
+            
+            if (draftedPlayers.length === 0) {
+                document.getElementById('teamAnalysis').innerHTML = 
+                    '<p style="color: #666;">No drafted players found. Draft some players first!</p>';
+                return;
+            }
+            
+            try {
+                const res = await fetch('/api/team-analysis', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ drafted_players: draftedPlayers })
+                });
+                const analysis = await res.json();
+                
+                renderTeamAnalysis(analysis);
+            } catch (e) {
+                showStatus('Error analyzing team: ' + e.message, 'error');
+            }
+        }
+        
+        function renderTeamAnalysis(analysis) {
+            const container = document.getElementById('teamAnalysis');
+            
+            const prioritiesHTML = analysis.priorities.map(p => 
+                `<div class="stat-card">
+                    <div class="stat-number">${p.need}</div>
+                    <div class="stat-label">${p.position} (${p.priority})</div>
+                </div>`
+            ).join('');
+            
+            const positionHTML = Object.entries(analysis.position_counts)
+                .map(([pos, count]) => `<strong>${pos}:</strong> ${count}`)
+                .join(' | ');
+            
+            container.innerHTML = `
+                <div class="stats">
+                    ${prioritiesHTML}
+                </div>
+                <p><strong>Current Roster:</strong> ${positionHTML}</p>
+                <p><strong>Next Priority:</strong> ${analysis.priorities[0] ? 
+                    `${analysis.priorities[0].position} (need ${analysis.priorities[0].need})` : 
+                    'Team looks balanced!'}</p>
+            `;
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            refreshData();
+        });
     </script>
 </body>
 </html>

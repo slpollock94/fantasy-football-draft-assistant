@@ -1,11 +1,13 @@
 import os
+import logging
 from typing import Dict, Any
 from datetime import datetime
 from dotenv import load_dotenv
 from espn_api.football import League
-from .mongo_utils import insert_players
+from mongo_utils import insert_players
 
 load_dotenv()
+logger = logging.getLogger(__name__)
 
 def populate_from_espn(league_id: str, year: int = 2024, free_agent_limit: int = 50):
     """Populate MongoDB with players from an ESPN league.
@@ -81,11 +83,13 @@ def populate_from_espn(league_id: str, year: int = 2024, free_agent_limit: int =
             print("Could not fetch free agents")
 
         insert_players(list(players.values()))
-        print(f"Inserted {len(players)} players from ESPN league into MongoDB.")
+        logger.info(f"Inserted {len(players)} players from ESPN league into database.")
 
     except Exception as e:
+        logger.exception("Error fetching ESPN data")
         print(f"Error fetching ESPN data: {e}")
         print("For private leagues, you may need to set ESPN_S2 and SWID in your .env file")
+        raise
 
 # Example usage:
 if __name__ == "__main__":
